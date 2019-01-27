@@ -10,7 +10,6 @@ class BankTransactionControllerTest extends WebTestCase
 {
     public static function setUpBeforeClass()
     {
-        exec('../../bin/console doctrine:database:drop --force');
         exec('../../bin/console doctrine:database:create');
         exec('../../bin/console doctrine:schema:create');
     }
@@ -49,10 +48,10 @@ class BankTransactionControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('POST', '/bank/transaction/add', [], [], [],
-            '{"amount": "123.123", "bookingDate": "2019-01-01 17:00:22", "bankTransactionParts":[{"reason": "test"}]}');
+            '{"amount": "123.123", "bookingDate": "2019-01-01 17:00:22", "parts":[{"reason": "test"}]}');
         $response = $client->getResponse();
-
-        $this->assertContains("bankTransactionParts", $response->getContent());
+        $this->assertSame(JsonResponse::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $this->assertContains("parts", $response->getContent());
         $this->assertContains("amount", $response->getContent());
     }
 
@@ -60,19 +59,33 @@ class BankTransactionControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('POST', '/bank/transaction/add', [], [], [],
-            '{"amount": "123.123", "bookingDate": "2019-01-01 12:00:02", "bankTransactionParts":[{"reason": "test", "amount": "1233"}]}');
+            '{"amount": "123.123", "bookingDate": "2019-01-01 12:00:02", "parts":[{"reason": "test", "amount": "1233"}]}');
         $response = $client->getResponse();
 
-        $this->assertContains("bankTransactionParts", $response->getContent());
+        $this->assertSame(JsonResponse::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $this->assertContains("parts", $response->getContent());
         $this->assertContains("amount", $response->getContent());
         $this->assertContains("should be a decimal number", $response->getContent());
+    }
+
+    public function testAddBankTransactionWithBadBookingDateFormat()
+    {
+        $client = static::createClient();
+        $client->request('POST', '/bank/transaction/add', [], [], [],
+            '{"amount": "123.123", "bookingDate": "2018 11 18 13:00:22", "bankTransactionParts":[{"amount": "123.123", "reason": "test"}]}');
+        $response = $client->getResponse();
+
+        $this->assertSame(JsonResponse::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $this->assertContains("error", $response->getContent());
+        $this->assertContains('bookingDate', $response->getContent());
+
     }
 
     public function testAddBankTransactionSuccess()
     {
         $client = static::createClient();
         $client->request('POST', '/bank/transaction/add', [], [], [],
-            '{"amount": "123.123", "bookingDate": "2018-11-18 13:00:22", "bankTransactionParts":[{"amount": "123.123", "reason": "test"}]}');
+            '{"amount": "123.123", "bookingDate": "2018-11-18 13:00:22", "parts":[{"amount": "123.123", "reason": "test"}]}');
         $response = $client->getResponse();
 
         $this->assertSame(JsonResponse::HTTP_OK, $response->getStatusCode());
@@ -102,5 +115,10 @@ class BankTransactionControllerTest extends WebTestCase
         $response = $client->getResponse();
 
         $this->assertSame(JsonResponse::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    public static  function tearDownAfterClass()
+    {
+        exec('../../bin/console doctrine:database:drop --force');
     }
 }
