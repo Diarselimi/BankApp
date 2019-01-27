@@ -50,7 +50,7 @@ class BankTransaction
     public function __construct()
     {
         $this->bankTransactionParts = new ArrayCollection();
-        $this->uuid = rand(0000, 9999);
+        $this->uuid = uniqid();
     }
 
     public function getId(): ?int
