@@ -36,7 +36,7 @@ class BankTransaction
     /**
      * @ORM\Column(type="datetime", name="booking_date")
      * @Assert\NotBlank()
-     * @SerializedName("booking_date")
+     * @Assert\DateTime(format="Y-m-d H:i:s")
      */
     private $bookingDate;
 
@@ -50,6 +50,7 @@ class BankTransaction
     public function __construct()
     {
         $this->bankTransactionParts = new ArrayCollection();
+        $this->uuid = rand(0000, 9999);
     }
 
     public function getId(): ?int
