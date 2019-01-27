@@ -26,7 +26,7 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: composer update -n --prefer-dist
+      - run: composer update --dev -n --prefer-dist
 
       - save_cache:
           paths:
@@ -34,4 +34,4 @@ jobs:
           key: v1-dependencies-{{ checksum "composer.json" }}
         
       # run tests!
-      - run: ./vendor/bin/phpunit
+      - run: ./vendor/bin/phpunit tests/
