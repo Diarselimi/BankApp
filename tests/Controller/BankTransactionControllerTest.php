@@ -28,7 +28,7 @@ class BankTransactionControllerTest extends WebTestCase
         $this->assertContains('form_validation', $response->getContent());
         $this->assertContains('message', $response->getContent());
         $this->assertContains('amount', $response->getContent());
-        $this->assertContains('uuid', $response->getContent());
+        $this->assertContains('bookingDate', $response->getContent());
     }
 
     public function testAddBankTransactionWithAmountOnly()
@@ -42,14 +42,14 @@ class BankTransactionControllerTest extends WebTestCase
         $this->assertSame(JsonResponse::HTTP_BAD_REQUEST, $response->getStatusCode());
         $this->assertArrayHasKey("form_validation", $arrayContent);
         $this->assertNotContains("amount", $response->getContent());
-        $this->assertContains("uuid", $response->getContent());
+        $this->assertContains("bookingDate", $response->getContent());
     }
 
     public function testAddBankTransactionWithoutPartAmount()
     {
         $client = static::createClient();
         $client->request('POST', '/bank/transaction/add', [], [], [],
-            '{"amount": "123.123", "uuid": "123123123", "bankTransactionParts":[{"reason": "test"}]}');
+            '{"amount": "123.123", "bookingDate": "2019-01-01 17:00:22", "bankTransactionParts":[{"reason": "test"}]}');
         $response = $client->getResponse();
 
         $this->assertContains("bankTransactionParts", $response->getContent());
@@ -60,7 +60,7 @@ class BankTransactionControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('POST', '/bank/transaction/add', [], [], [],
-            '{"amount": "123.123", "uuid": "123123123", "bankTransactionParts":[{"reason": "test", "amount": "1233"}]}');
+            '{"amount": "123.123", "bookingDate": "2019-01-01 12:00:02", "bankTransactionParts":[{"reason": "test", "amount": "1233"}]}');
         $response = $client->getResponse();
 
         $this->assertContains("bankTransactionParts", $response->getContent());
@@ -72,19 +72,35 @@ class BankTransactionControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('POST', '/bank/transaction/add', [], [], [],
-            '{"amount": "123.123", "uuid": "123123123", "bankTransactionParts":[{"amount": "123.123", "reason": "test"}]}');
+            '{"amount": "123.123", "bookingDate": "2018-11-18 13:00:22", "bankTransactionParts":[{"amount": "123.123", "reason": "test"}]}');
         $response = $client->getResponse();
 
         $this->assertSame(JsonResponse::HTTP_OK, $response->getStatusCode());
         $this->assertContains("success", $response->getContent());
+        $this->assertContains('uuid', $response->getContent());
+
+        return ((array) json_decode($response->getContent(), 1))['uuid'];
     }
 
-    public function testGetBankTransactionsByUuid()
+    /**
+     * @depends testAddBankTransactionSuccess
+     */
+    public function testGetBankTransactionsByUuid($uuid)
     {
         $client = static::createClient();
-        $client->request('GET', '/bank/transaction/123123123');
+        $client->request('GET', '/bank/transaction/'.$uuid);
         $response = $client->getResponse();
 
-        $this->assertContains("123123123", $response->getContent());
+        $this->assertSame(JsonResponse::HTTP_OK, $response->getStatusCode());
+        $this->assertContains($uuid, $response->getContent());
+    }
+
+    public function testGetBankTransactionsByNonExistingUuid()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/bank/transaction/9');
+        $response = $client->getResponse();
+
+        $this->assertSame(JsonResponse::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 }

@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -22,7 +23,6 @@ class BankTransaction
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
      */
     private $uuid;
 
@@ -34,7 +34,9 @@ class BankTransaction
     private $amount;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", name="booking_date")
+     * @Assert\NotBlank()
+     * @SerializedName("booking_date")
      */
     private $bookingDate;
 
@@ -48,7 +50,6 @@ class BankTransaction
     public function __construct()
     {
         $this->bankTransactionParts = new ArrayCollection();
-        $this->bookingDate = new \DateTime('now');
     }
 
     public function getId(): ?int
@@ -82,12 +83,22 @@ class BankTransaction
 
     public function getBookingDate(): ?string
     {
-        return $this->bookingDate->format('Y-m-d H:i:s');
+        if($this->bookingDate !== null) {
+            return $this->bookingDate->format('Y-m-d H:i:s');
+        }
+        return $this->bookingDate;
     }
 
-    public function setBookingDate(\DateTimeInterface $bookingDate): self
+    /**
+     * @param string $bookingDate
+     * @return BankTransaction
+     * @throws \Exception
+     */
+    public function setBookingDate(string $bookingDate = null): self
     {
-        $this->bookingDate = $bookingDate;
+        if($bookingDate !== null) {
+            $this->bookingDate = new \DateTime($bookingDate);
+        }
 
         return $this;
     }
