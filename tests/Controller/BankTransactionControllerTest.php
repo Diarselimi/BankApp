@@ -72,13 +72,25 @@ class BankTransactionControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('POST', '/bank/transaction/add', [], [], [],
-            '{"amount": "123.123", "bookingDate": "2018 11 18 13:00:22", "bankTransactionParts":[{"amount": "123.123", "reason": "test"}]}');
+            '{"amount": "123.123", "bookingDate": "2018 11 18 13:00:22", "parts":[{"amount": "123.123", "reason": "test"}]}');
         $response = $client->getResponse();
 
         $this->assertSame(JsonResponse::HTTP_BAD_REQUEST, $response->getStatusCode());
         $this->assertContains("error", $response->getContent());
         $this->assertContains('bookingDate', $response->getContent());
 
+    }
+
+    public function testAddBankTransactionWithoutPartsInBody()
+    {
+        $client = static::createClient();
+        $client->request('POST', '/bank/transaction/add', [], [], [],
+            '{"amount": "123.123", "bookingDate": "2018-11-18 13:00:22"}');
+        $response = $client->getResponse();
+
+        $this->assertSame(JsonResponse::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $this->assertContains("error", $response->getContent());
+        $this->assertContains('parts', $response->getContent());
     }
 
     public function testAddBankTransactionSuccess()

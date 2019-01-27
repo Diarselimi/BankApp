@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\BankTransaction;
 use App\Entity\BankTransactionPart;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Log\Logger;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,6 +30,10 @@ class BankTransactionController extends AppController
 
         $form = $this->createForm(BankTransactionType::class, $bankTransaction);
         $form->submit($data);
+
+        if($bankTransaction->getParts()->count() == 0) {
+            $form->get('parts')->addError(new FormError('There should be at least one Transaction Part'));
+        }
 
         if($form->isSubmitted() && $form->isValid()) {
 
