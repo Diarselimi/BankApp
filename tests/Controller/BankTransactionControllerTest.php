@@ -10,8 +10,9 @@ class BankTransactionControllerTest extends WebTestCase
 {
     public static function setUpBeforeClass()
     {
-        exec('../../bin/console doctrine:database:create');
-        exec('../../bin/console doctrine:schema:create');
+
+        exec(__DIR__.'/../../bin/console doctrine:database:create');
+        exec(__DIR__.'/../../bin/console doctrine:schema:create');
     }
 
     public function testAddBankTransactionWithoutBodyContent()
@@ -131,6 +132,6 @@ class BankTransactionControllerTest extends WebTestCase
 
     public static  function tearDownAfterClass()
     {
-        exec('../../bin/console doctrine:database:drop --force');
+        exec(__DIR__.'/../../bin/console doctrine:database:drop --force');
     }
 }
