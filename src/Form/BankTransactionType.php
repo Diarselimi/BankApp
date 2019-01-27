@@ -19,10 +19,12 @@ class BankTransactionType extends AbstractType
     {
         $builder
             ->add('amount')
-            ->add('bookingDate', TextType::class, [
-                'by_reference' => false
+            ->add('bookingDate', DateTimeType::class, [
+                'by_reference'  => false,
+                'widget'        =>  'single_text',
+                'date_format'   =>  'yyyy-MM-dd HH:ii:ss'
             ])
-            ->add('bankTransactionParts', CollectionType::class, [
+            ->add('parts', CollectionType::class, [
                 'entry_type' => BankTransactionPartType::class,
                 'by_reference' => false,
                 'allow_add'     => true,

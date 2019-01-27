@@ -5,8 +5,6 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
-use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -36,21 +34,21 @@ class BankTransaction
     /**
      * @ORM\Column(type="datetime", name="booking_date")
      * @Assert\NotBlank()
-     * @Assert\DateTime(format="Y-m-d H:i:s")
      */
     private $bookingDate;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\BankTransactionPart", mappedBy="bankTransaction", cascade={"persist"})
+     * @Assert\NotBlank()
      * @Assert\Valid()
-     * @MaxDepth(1)
      */
-    private $bankTransactionParts;
+    private $parts;
 
     public function __construct()
     {
         $this->bankTransactionParts = new ArrayCollection();
         $this->uuid = uniqid();
+        $this->parts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -95,11 +93,9 @@ class BankTransaction
      * @return BankTransaction
      * @throws \Exception
      */
-    public function setBookingDate(string $bookingDate = null): self
+    public function setBookingDate($bookingDate): self
     {
-        if($bookingDate !== null) {
-            $this->bookingDate = new \DateTime($bookingDate);
-        }
+        $this->bookingDate = $bookingDate;
 
         return $this;
     }
@@ -107,28 +103,28 @@ class BankTransaction
     /**
      * @return Collection|BankTransactionPart[]
      */
-    public function getBankTransactionParts(): Collection
+    public function getParts(): Collection
     {
-        return $this->bankTransactionParts;
+        return $this->parts;
     }
 
-    public function addBankTransactionPart(BankTransactionPart $bankTransactionPart): self
+    public function addPart(BankTransactionPart $part): self
     {
-        if (!$this->bankTransactionParts->contains($bankTransactionPart)) {
-            $this->bankTransactionParts[] = $bankTransactionPart;
-            $bankTransactionPart->setBankTransaction($this);
+        if (!$this->parts->contains($part)) {
+            $this->parts[] = $part;
+            $part->setBankTransaction($this);
         }
 
         return $this;
     }
 
-    public function removeBankTransactionPart(BankTransactionPart $bankTransactionPart): self
+    public function removePart(BankTransactionPart $part): self
     {
-        if ($this->bankTransactionParts->contains($bankTransactionPart)) {
-            $this->bankTransactionParts->removeElement($bankTransactionPart);
+        if ($this->parts->contains($part)) {
+            $this->parts->removeElement($part);
             // set the owning side to null (unless already changed)
-            if ($bankTransactionPart->getBankTransaction() === $this) {
-                $bankTransactionPart->setBankTransaction(null);
+            if ($part->getBankTransaction() === $this) {
+                $part->setBankTransaction(null);
             }
         }
 

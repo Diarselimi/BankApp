@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\BankTransaction;
+use App\Entity\BankTransactionPart;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Log\Logger;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,6 +25,8 @@ class BankTransactionController extends AppController
         $data = json_decode($request->getContent(), true);
 
         $bankTransaction = new BankTransaction();
+        $bankTransaction->addPart(new BankTransactionPart());
+
         $form = $this->createForm(BankTransactionType::class, $bankTransaction);
         $form->submit($data);
 
@@ -37,7 +40,8 @@ class BankTransactionController extends AppController
             } catch (\Exception $e) {
 
                 return $this->json([
-                    'message'   =>  'error'
+                    'message'   =>  'error',
+                    'form_validation'   =>  $this->formErrors($form)
                 ], JsonResponse::HTTP_BAD_REQUEST);
             }
 

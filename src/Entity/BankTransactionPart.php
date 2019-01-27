@@ -20,7 +20,7 @@ class BankTransactionPart
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\BankTransaction", inversedBy="bankTransactionParts")
+     * @ORM\ManyToOne(targetEntity="App\Entity\BankTransaction", inversedBy="parts")
      * @ORM\JoinColumn(nullable=false)
      */
     private $bankTransaction;
@@ -78,4 +78,5 @@ class BankTransactionPart
 
         return $this;
     }
+
 }
