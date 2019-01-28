@@ -16,3 +16,5 @@ GET | /bank/transaction/uuid| | `{"id": 1, "uuid": 123123, "amount": "123.3", "b
 3.  `bin/console doctrine:schema:create`
 4.  `./vendor/bin/phpunit tests/` to run the tests.
 5.  `cd public/ & php -sS localhost:8000`
+
+CircleCI.com [![CircleCI](https://circleci.com/gh/Diarselimi/BankApp/tree/master.svg?style=svg)](https://circleci.com/gh/Diarselimi/BankApp/tree/master)
